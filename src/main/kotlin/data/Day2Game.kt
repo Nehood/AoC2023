@@ -1,7 +1,6 @@
 package data
 
 data class Day2Game(val id: Int, val gameSets: List<Day2GameSet>) {
-    //Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
     companion object {
         private val GAME_PARTS_SEPARATOR = ':'
         private val SPACE = ' '
