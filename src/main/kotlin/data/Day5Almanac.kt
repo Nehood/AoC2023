@@ -1,8 +1,14 @@
 package data
 
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
-data class Day5Almanac(val seeds: List<Long>, val maps: Map<MapType, List<Pair<LongRange, Long>>>) {
+data class Day5Almanac(
+    val seeds: List<Long>,
+    val seedRanges: List<LongRange>,
+    val maps: Map<MapType, List<Pair<LongRange, Long>>>
+) {
     companion object {
         private val SEEDS = "seeds: "
         private val SEED_TO_SOIL = "seed-to-soil map:"
@@ -16,12 +22,30 @@ data class Day5Almanac(val seeds: List<Long>, val maps: Map<MapType, List<Pair<L
 
         fun fromAlmanac(almanac: List<String>): Day5Almanac {
             val seeds = almanac[0].substringAfter(SEEDS).split(SPACE).map { it.toLong() }
-            val seedToSoil = almanac.subList(almanac.indexOf(SEED_TO_SOIL) + 1, almanac.withIndex().indexOfFirst { (index, value) -> index > almanac.indexOf(SEED_TO_SOIL) && value.isEmpty() })
-            val soilToFertilizer = almanac.subList(almanac.indexOf(SOIL_TO_FERTILIZER) + 1, almanac.withIndex().indexOfFirst { (index, value) -> index > almanac.indexOf(SOIL_TO_FERTILIZER) && value.isEmpty() })
-            val fertilizerToWater = almanac.subList(almanac.indexOf(FERTILIZER_TO_WATER) + 1, almanac.withIndex().indexOfFirst { (index, value) -> index > almanac.indexOf(FERTILIZER_TO_WATER) && value.isEmpty() })
-            val waterToLight = almanac.subList(almanac.indexOf(WATER_TO_LIGHT) + 1, almanac.withIndex().indexOfFirst { (index, value) -> index > almanac.indexOf(WATER_TO_LIGHT) && value.isEmpty() })
-            val lightToTemperature = almanac.subList(almanac.indexOf(LIGHT_TO_TEMPERATURE) + 1, almanac.withIndex().indexOfFirst { (index, value) -> index > almanac.indexOf(LIGHT_TO_TEMPERATURE) && value.isEmpty() })
-            val temperatureToHumidity = almanac.subList(almanac.indexOf(TEMPERATURE_TO_HUMIDITY) + 1, almanac.withIndex().indexOfFirst { (index, value) -> index > almanac.indexOf(TEMPERATURE_TO_HUMIDITY) && value.isEmpty() })
+            val seedToSoil = almanac.subList(
+                almanac.indexOf(SEED_TO_SOIL) + 1,
+                almanac.withIndex()
+                    .indexOfFirst { (index, value) -> index > almanac.indexOf(SEED_TO_SOIL) && value.isEmpty() })
+            val soilToFertilizer = almanac.subList(
+                almanac.indexOf(SOIL_TO_FERTILIZER) + 1,
+                almanac.withIndex()
+                    .indexOfFirst { (index, value) -> index > almanac.indexOf(SOIL_TO_FERTILIZER) && value.isEmpty() })
+            val fertilizerToWater = almanac.subList(
+                almanac.indexOf(FERTILIZER_TO_WATER) + 1,
+                almanac.withIndex()
+                    .indexOfFirst { (index, value) -> index > almanac.indexOf(FERTILIZER_TO_WATER) && value.isEmpty() })
+            val waterToLight = almanac.subList(
+                almanac.indexOf(WATER_TO_LIGHT) + 1,
+                almanac.withIndex()
+                    .indexOfFirst { (index, value) -> index > almanac.indexOf(WATER_TO_LIGHT) && value.isEmpty() })
+            val lightToTemperature = almanac.subList(
+                almanac.indexOf(LIGHT_TO_TEMPERATURE) + 1,
+                almanac.withIndex()
+                    .indexOfFirst { (index, value) -> index > almanac.indexOf(LIGHT_TO_TEMPERATURE) && value.isEmpty() })
+            val temperatureToHumidity = almanac.subList(
+                almanac.indexOf(TEMPERATURE_TO_HUMIDITY) + 1,
+                almanac.withIndex()
+                    .indexOfFirst { (index, value) -> index > almanac.indexOf(TEMPERATURE_TO_HUMIDITY) && value.isEmpty() })
             val humidityToLocation = almanac.subList(almanac.indexOf(HUMIDITY_TO_LOCATION) + 1, almanac.lastIndex)
 
             val seedToSoilRanges = seedToSoil.toRanges()
@@ -32,13 +56,21 @@ data class Day5Almanac(val seeds: List<Long>, val maps: Map<MapType, List<Pair<L
             val temperatureToHumidityRanges = temperatureToHumidity.toRanges()
             val humidityToLocationRanges = humidityToLocation.toRanges()
 
-            val mapOfMaps =  mapOf<MapType, List<Pair<LongRange, Long>>>(
-                Pair(MapType.SEED_TO_SOIL, seedToSoilRanges), Pair(MapType.SOIL_TO_FERTILIZER, soilToFertilizeRanges),
-                Pair(MapType.FERTILIZER_TO_WATER, fertilizerToWaterRanges), Pair(MapType.WATER_TO_LIGHT, waterToLightRanges),
-                Pair(MapType.LIGHT_TO_TEMPERATURE, lightToTemperatureRanges), Pair(MapType.TEMPERATURE_TO_HUMIDITY, temperatureToHumidityRanges),
-                Pair(MapType.HUMIDITY_TO_LOCATION, humidityToLocationRanges))
+            val mapOfMaps = mapOf<MapType, List<Pair<LongRange, Long>>>(
+                Pair(MapType.SEED_TO_SOIL, seedToSoilRanges),
+                Pair(MapType.SOIL_TO_FERTILIZER, soilToFertilizeRanges),
+                Pair(MapType.FERTILIZER_TO_WATER, fertilizerToWaterRanges),
+                Pair(MapType.WATER_TO_LIGHT, waterToLightRanges),
+                Pair(MapType.LIGHT_TO_TEMPERATURE, lightToTemperatureRanges),
+                Pair(MapType.TEMPERATURE_TO_HUMIDITY, temperatureToHumidityRanges),
+                Pair(MapType.HUMIDITY_TO_LOCATION, humidityToLocationRanges)
+            )
 
-            return Day5Almanac(seeds, mapOfMaps)
+            val seedRanges = mutableListOf<LongRange>()
+            for (i in 0..<seeds.lastIndex step 2) {
+                seedRanges.add(LongRange(seeds[i], seeds[i] + seeds[i + 1]))
+            }
+            return Day5Almanac(seeds, seedRanges.toList(), mapOfMaps)
         }
 
         private fun List<String>.toRanges(): List<Pair<LongRange, Long>> {
@@ -69,47 +101,65 @@ data class Day5Almanac(val seeds: List<Long>, val maps: Map<MapType, List<Pair<L
         return currentNumber
     }
 
-//    fun test() {
-//        val xd = this.maps.get(MapType.SEED_TO_SOIL)!!
-//        val xdSorted = xd.sortedBy { it.first.first }
-//
-//        val xd1 = this.maps.get(MapType.SEED_TO_SOIL.getNextMapType())!!
-//        val xd1Sorted = xd1.sortedBy { it.first.first }
-//        for (i in 0..<xdSorted.lastIndex)
-//        {
-//            val res1 = xdSorted[0].first.canBeMerged(xdSorted[1].first)
-//            val res2 = xdSorted[0].second.canBeMerged(xdSorted[1].second)
-//            val a = 7
-//        }
-//        val start = 4088478806L
-//        val range = 114805397L
-//
-//
-////        for (i in 0..<xd.lastIndex) {
-////            for (j in i+1..xd.lastIndex) {
-////                val result = xd[i].first.canBeMerged(xd[j].first)
-////                val a = 7
-////            }
-////        }
-//        val a = 7
-//    }
-//
-//    private fun LongRange.canBeMerged(other: LongRange): Boolean {
-//        return (other.first >= this.first && other.first <= this.last) || (this.first >= other.first && this.first <= other.last)
-//                || (other.last <= this.last && other.last >= this.first) || (this.last <= other.last && this.last >= other.first)
-//    }
+    fun matchToRanges(): Long {
+        var lowest = Long.MAX_VALUE
+        for (seedRange in this.seedRanges) {
+            var currentMapType = MapType.SEED_TO_SOIL
+            var currentRanges = mutableListOf(LongRange(seedRange.first, seedRange.last))
+            while (currentMapType != MapType.FINAL) {
+                val matchedRanges = mutableListOf<LongRange>()
+                val currentMap = this.maps[currentMapType]!!
+                val processedMatches = mutableListOf<LongRange>()
+                for (currentRange in currentRanges) {
+                    var currentModifiableRange = LongRange(currentRange.first, currentRange.last)
+                    for (mapRange in currentMap) {
+                        if (mapRange.first.first <= currentModifiableRange.first && mapRange.first.last >= currentModifiableRange.last) {
+                            // full match
+                            matchedRanges.add(LongRange(currentModifiableRange.first, currentModifiableRange.last))
+                            currentModifiableRange = LongRange.EMPTY
+                            break
+                        } else if (currentModifiableRange.first >= mapRange.first.first && currentModifiableRange.first <= mapRange.first.last || currentModifiableRange.last <= mapRange.first.last && currentModifiableRange.last >= mapRange.first.first) {
+                            // partial match
+                            val newRangeStart = max(currentModifiableRange.first, mapRange.first.first)
+                            val newRangeEnd = min(currentModifiableRange.last, mapRange.first.last)
+
+                            val modifiedRangeStart =
+                                if (newRangeStart == currentModifiableRange.first) newRangeEnd else currentModifiableRange.first
+                            val modifiedRangeEnd =
+                                if (newRangeEnd == currentModifiableRange.last) newRangeStart else currentModifiableRange.last
+                            currentModifiableRange = LongRange(modifiedRangeStart, modifiedRangeEnd)
+                            matchedRanges.add(LongRange(newRangeStart, newRangeEnd))
+                        }
+                    }
+                    if (currentModifiableRange != LongRange.EMPTY) {
+                        // none match, preserve
+                        processedMatches.add(currentModifiableRange)
+                    }
+                }
+                currentMapType = currentMapType.getNextMapType()
+                for (matchedRange in matchedRanges) {
+                    for (mapRange in currentMap) {
+                        if (matchedRange.first >= mapRange.first.first && matchedRange.last <= mapRange.first.last) {
+                            processedMatches.add(
+                                LongRange(
+                                    abs(matchedRange.first - mapRange.second), abs(matchedRange.last - mapRange.second)
+                                )
+                            )
+                        }
+                    }
+                }
+                currentRanges = processedMatches.toMutableList()
+            }
+            val currentLowest = currentRanges.minOfOrNull { it.first }!!
+            if (currentLowest < lowest) lowest = currentLowest
+        }
+        return lowest
+    }
 
 }
 
 enum class MapType {
-    SEED_TO_SOIL,
-    SOIL_TO_FERTILIZER,
-    FERTILIZER_TO_WATER,
-    WATER_TO_LIGHT,
-    LIGHT_TO_TEMPERATURE,
-    TEMPERATURE_TO_HUMIDITY,
-    HUMIDITY_TO_LOCATION,
-    FINAL;
+    SEED_TO_SOIL, SOIL_TO_FERTILIZER, FERTILIZER_TO_WATER, WATER_TO_LIGHT, LIGHT_TO_TEMPERATURE, TEMPERATURE_TO_HUMIDITY, HUMIDITY_TO_LOCATION, FINAL;
 
     fun getNextMapType(): MapType {
         return when (this) {

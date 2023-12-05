@@ -7,9 +7,8 @@ class Day5IfYouGiveASeedAFertilizer {
         return translatedAlmanac.seeds.minOfOrNull { translatedAlmanac.getLocationNumberForSeed(it) }!!
     }
 
-    fun test(almanac: List<String>): Long {
+    fun findLowestLocationNumberFromRanges(almanac: List<String>): Long {
         val translatedAlmanac = Day5Almanac.fromAlmanac(almanac)
-        //translatedAlmanac.test()
-        return translatedAlmanac.seeds.minOfOrNull { translatedAlmanac.getLocationNumberForSeed(it) }!!
+        return translatedAlmanac.matchToRanges()
     }
 }
