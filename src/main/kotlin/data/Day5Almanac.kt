@@ -1,6 +1,8 @@
 package data
 
-data class Day5Almanac(val seeds: List<Long>, val maps: Map<MapType, List<Pair<LongRange, LongRange>>>) {
+import kotlin.math.abs
+
+data class Day5Almanac(val seeds: List<Long>, val maps: Map<MapType, List<Pair<LongRange, Long>>>) {
     companion object {
         private val SEEDS = "seeds: "
         private val SEED_TO_SOIL = "seed-to-soil map:"
@@ -30,7 +32,7 @@ data class Day5Almanac(val seeds: List<Long>, val maps: Map<MapType, List<Pair<L
             val temperatureToHumidityRanges = temperatureToHumidity.toRanges()
             val humidityToLocationRanges = humidityToLocation.toRanges()
 
-            val mapOfMaps =  mapOf<MapType, List<Pair<LongRange, LongRange>>>(
+            val mapOfMaps =  mapOf<MapType, List<Pair<LongRange, Long>>>(
                 Pair(MapType.SEED_TO_SOIL, seedToSoilRanges), Pair(MapType.SOIL_TO_FERTILIZER, soilToFertilizeRanges),
                 Pair(MapType.FERTILIZER_TO_WATER, fertilizerToWaterRanges), Pair(MapType.WATER_TO_LIGHT, waterToLightRanges),
                 Pair(MapType.LIGHT_TO_TEMPERATURE, lightToTemperatureRanges), Pair(MapType.TEMPERATURE_TO_HUMIDITY, temperatureToHumidityRanges),
@@ -39,24 +41,22 @@ data class Day5Almanac(val seeds: List<Long>, val maps: Map<MapType, List<Pair<L
             return Day5Almanac(seeds, mapOfMaps)
         }
 
-        private fun List<String>.toRanges(): List<Pair<LongRange, LongRange>> {
+        private fun List<String>.toRanges(): List<Pair<LongRange, Long>> {
             return this.map {
                 val parts = it.split(SPACE)
                 val destinationRangeStart = parts[0].toLong()
                 val sourceRangeStart = parts[1].toLong()
                 val rangeLength = parts[2].toLong()
 
-                val destinationRangeEnd = destinationRangeStart + rangeLength
                 val sourceRangeEnd = sourceRangeStart + rangeLength
-                Pair(LongRange(sourceRangeStart, sourceRangeEnd), LongRange(destinationRangeStart, destinationRangeEnd))
+                Pair(LongRange(sourceRangeStart, sourceRangeEnd), sourceRangeStart - destinationRangeStart)
             }
         }
     }
 
-    private fun List<Pair<LongRange, LongRange>>.matchToDestination(source: Long): Long {
+    private fun List<Pair<LongRange, Long>>.matchToDestination(source: Long): Long {
         val matchedRange = this.firstOrNull { it.first.first <= source && it.first.last >= source } ?: return source
-        val diff = source - matchedRange.first.first
-        return matchedRange.second.first + diff
+        return abs(source - matchedRange.second)
     }
 
     fun getLocationNumberForSeed(seedNumber: Long): Long {
@@ -68,6 +68,36 @@ data class Day5Almanac(val seeds: List<Long>, val maps: Map<MapType, List<Pair<L
         }
         return currentNumber
     }
+
+//    fun test() {
+//        val xd = this.maps.get(MapType.SEED_TO_SOIL)!!
+//        val xdSorted = xd.sortedBy { it.first.first }
+//
+//        val xd1 = this.maps.get(MapType.SEED_TO_SOIL.getNextMapType())!!
+//        val xd1Sorted = xd1.sortedBy { it.first.first }
+//        for (i in 0..<xdSorted.lastIndex)
+//        {
+//            val res1 = xdSorted[0].first.canBeMerged(xdSorted[1].first)
+//            val res2 = xdSorted[0].second.canBeMerged(xdSorted[1].second)
+//            val a = 7
+//        }
+//        val start = 4088478806L
+//        val range = 114805397L
+//
+//
+////        for (i in 0..<xd.lastIndex) {
+////            for (j in i+1..xd.lastIndex) {
+////                val result = xd[i].first.canBeMerged(xd[j].first)
+////                val a = 7
+////            }
+////        }
+//        val a = 7
+//    }
+//
+//    private fun LongRange.canBeMerged(other: LongRange): Boolean {
+//        return (other.first >= this.first && other.first <= this.last) || (this.first >= other.first && this.first <= other.last)
+//                || (other.last <= this.last && other.last >= this.first) || (this.last <= other.last && this.last >= other.first)
+//    }
 
 }
 

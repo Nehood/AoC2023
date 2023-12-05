@@ -59,4 +59,11 @@ class Day5IfYouGiveASeedAFertilizerTest {
         val result = day5IfYouGiveASeedAFertilizer.findLowestLocationNumber(input)
         assertEquals(382895070L, result)
     }
+
+    @Test
+    fun test() {
+        val input = readResourceFile()
+        val result = day5IfYouGiveASeedAFertilizer.test(input)
+        assertEquals(382895070L, result)
+    }
 }
