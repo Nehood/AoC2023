@@ -8,4 +8,8 @@ class Day7CamelCards {
     private fun List<Day7Hand>.calculateWinnings(): Long {
         return this.mapIndexed { index, it -> (index + 1) * it.bid }.sum()
     }
+
+    fun calculateTotalWinningsWithJokers(handStrings: List<String>): Long {
+        return handStrings.map { Day7Hand.fromHand(it, true) }.sorted().calculateWinnings()
+    }
 }
