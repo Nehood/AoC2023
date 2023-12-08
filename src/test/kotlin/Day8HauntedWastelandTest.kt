@@ -49,4 +49,29 @@ class Day8HauntedWastelandTest {
         val result = day8HauntedWasteland.countStepsToReachDestination(input)
         assertEquals(19241, result)
     }
+
+    @Test
+    fun countStepsToReachDestinationAsGhostExample() {
+        val input = """
+            LR
+
+            11A = (11B, XXX)
+            11B = (XXX, 11Z)
+            11Z = (11B, XXX)
+            22A = (22B, XXX)
+            22B = (22C, 22C)
+            22C = (22Z, 22Z)
+            22Z = (22B, 22B)
+            XXX = (XXX, XXX)
+        """.trimIndent().split("\n")
+        val result = day8HauntedWasteland.countStepsToReachDestinationAsGhost(input)
+        assertEquals(6, result)
+    }
+
+    @Test
+    fun countStepsToReachDestinationAsGhost() {
+        val input = readResourceFile()
+        val result = day8HauntedWasteland.countStepsToReachDestinationAsGhost(input)
+        assertEquals(9606140307013, result)
+    }
 }
