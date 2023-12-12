@@ -26,7 +26,7 @@ class Day10PipeMaze {
 
     fun countSpacesInsideLoop(pipesSketch: List<String>): Int {
         val pipesMap = pipesSketch.map { it.toCharArray() }
-        val distancesMap = pipesMap.traversePipeLoop(true)
+        val distancesMap = pipesMap.traversePipeLoop()
         distancesMap.draw()
         distancesMap.markInnerAndOuterLoops()
         println()
@@ -148,54 +148,73 @@ class Day10PipeMaze {
             for ((x, symbol) in line.withIndex()) {
                 if (this[y][x] == DEFAULT_DISTANCE) {
                     if (y == 0 || x == 0 || y == this.lastIndex || x == this[y].lastIndex ) continue
-                    val xProgressions = listOf( x - 1 downTo 0, x + 1 .. this[y].lastIndex)
-                    val yProgressions = listOf( y - 1 downTo 0, y + 1 .. this.lastIndex)
-                    val xRayProjections = xProgressions.map { this.castRayX(y, x, it) }
-                    val yRayProgressions = yProgressions.map { this.castRayY(y, x, it) }
-                    if (xRayProjections.contains(false) || yRayProgressions.contains(false)) continue
-                    this[y][x] = INSIDE_LOOP
+                    if (this.castRayXNew(y, x, x + 1 .. this[y].lastIndex)) this[y][x] = INSIDE_LOOP
                 }
             }
         }
     }
 
-    private fun List<IntArray>.castRayX(y: Int, x: Int, xProgression: IntProgression): Boolean {
+    private fun List<IntArray>.castRayXNew(y: Int, x: Int, xProgression: IntProgression): Boolean {
         var intersections = 0
+        var continuous = false
+        var fromTop = false
         var previousValue = this[y][x]
-        var continuousValue = false
         for (curX in xProgression) {
-            if (this[y][curX] > DEFAULT_DISTANCE) {
-                if ((abs(previousValue - this[y][curX]) == 1) || (previousValue == 0 || this[y][curX] == 0)) { //continuous value
-                    if (!continuousValue) {
-                        continuousValue = true
-                        ++intersections
-                    }
-                } else {
-                    ++intersections
-                    continuousValue = false
-                }
-                previousValue = this[y][curX]
-            }
-        }
-        return (intersections % 2 != 0)
-    }
+            val currentValue = this[y][curX]
 
-    private fun List<IntArray>.castRayY(y: Int, x: Int, yProgression: IntProgression): Boolean {
-        var intersections = 0
-        var previousValue = this[y][x]
-        var continuousValue = false
-        for (curY in yProgression) {
-            if (this[curY][x] > DEFAULT_DISTANCE) {
-                if ((abs(previousValue - this[curY][x]) == 1) || (previousValue == 0 || this[curY][x] == 0)){ //continuous value
-                    if (!continuousValue) {
-                        continuousValue = true
+            if (currentValue > DEFAULT_DISTANCE || continuous) {
+                if (abs(currentValue - previousValue) == 1) {// we are in continuous space
+                    if (!continuous) {
+                        continuous = true
+                        val previousPreviousFromTopValue = this[y-1][curX-1]
+                        if (abs(previousValue - previousPreviousFromTopValue) == 1) { // yes it is
+                            fromTop = true
+                        }
+                        // check if the line is going from the top, or from the bottom
+                    }
+                } else if (continuous) { // we had a continuous space before, let's check that
+                    val previousPreviousFromTopValue = this[y-1][curX-1]
+                    if (abs(previousValue - previousPreviousFromTopValue) == 1) {
+                        // yes, now we also have last value from top
+                        if (fromTop) {   // both were from the same sign - this should not be counted as intersection
+                            --intersections
+                        } else {// both were from different signs - this should be counted as intersection
+
+                        }
+                    } else {    // now we have value from bottom
+                        if (fromTop) {   // both were from different signs - this should be counted as intersection
+
+                        } else { // both were from the same sign - this should not be counted as intersection
+                            --intersections
+                        }
+                    }
+                    fromTop = false
+                    continuous = false
+                    if (currentValue > DEFAULT_DISTANCE) {
                         ++intersections
                     }
                 } else {
                     ++intersections
-                    continuousValue = false
                 }
-                previousValue = this[curY][x]
+            }
+            previousValue = currentValue
+        }
+        // handle last element case
+        if (continuous) { // we had a continuous space before, let's check that
+            val previousPreviousFromTopValue = this[y-1][this[y].lastIndex]
+            if (abs(previousValue - previousPreviousFromTopValue) == 1) {
+                // yes, now we also have last value from top
+                if (fromTop) {   // both were from the same sign - this should not be counted as intersection
+                    --intersections
+                } else {// both were from different signs - this should be counted as intersection
+
+                }
+            } else {    // now we have value from bottom
+                if (fromTop) {   // both were from different signs - this should be counted as intersection
+
+                } else { // both were from the same sign - this should not be counted as intersection
+                    --intersections
+                }
             }
         }
         return (intersections % 2 != 0)
