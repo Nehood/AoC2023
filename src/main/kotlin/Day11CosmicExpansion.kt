@@ -8,11 +8,24 @@ class Day11CosmicExpansion {
     fun sumShortestPathsBetweenGalaxies(image: List<String>): Long {
         val expandedImage = image.expand()
         val galaxies = expandedImage.findGalaxies()
-        expandedImage.draw()
         var pathLengthsSum = 0L
         for (index1 in 0..<galaxies.lastIndex) {
             for (index2 in index1 + 1..galaxies.lastIndex) {
                 val distance = galaxies[index1].calculateManhattanDistance(galaxies[index2])
+                pathLengthsSum += distance
+            }
+        }
+        return pathLengthsSum
+    }
+
+    fun sumShortestPathsBetweenAncientGalaxies(image: List<String>): Long {
+        val expandedRows = image.getExpandedRows()
+        val expandedColumns = image.getExpandedColumns()
+        val galaxies = image.findGalaxies()
+        var pathLengthsSum = 0L
+        for (index1 in 0..<galaxies.lastIndex) {
+            for (index2 in index1 + 1..galaxies.lastIndex) {
+                val distance = galaxies[index1].calculateAncientManhattanDistance(galaxies[index2], expandedRows, expandedColumns)
                 pathLengthsSum += distance
             }
         }
@@ -29,7 +42,7 @@ class Day11CosmicExpansion {
             }
         }
         val xesToAdd = mutableListOf<Int>()
-        for (x in 0..this[0].lastIndex) {       // this shit also expands
+        for (x in 0..this[0].lastIndex) {
             var allSpace = true
             for (y in 0..this.lastIndex) {
                 if (this[y][x] == GALAXY) {
@@ -71,5 +84,32 @@ class Day11CosmicExpansion {
             }
             println()
         }
+    }
+
+    private fun List<String>.getExpandedRows(): List<Int> {
+        val expandedRows = mutableListOf<Int>()
+        for ((y, line) in this.withIndex()) {
+            if (line.all { it == SPACE }) {
+                expandedRows.add(y)
+            }
+        }
+        return expandedRows.toList()
+    }
+
+    private fun List<String>.getExpandedColumns(): List<Int> {
+        val expandedColumns = mutableListOf<Int>()
+        for (x in 0..this[0].lastIndex) {
+            var allSpace = true
+            for (y in 0..this.lastIndex) {
+                if (this[y][x] == GALAXY) {
+                    allSpace = false
+                    break
+                }
+            }
+            if (allSpace) {
+                expandedColumns.add(x)
+            }
+        }
+        return expandedColumns
     }
 }

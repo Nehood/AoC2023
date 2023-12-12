@@ -37,4 +37,29 @@ class Day11CosmicExpansionTest {
         val result = day11CosmicExpansion.sumShortestPathsBetweenGalaxies(input)
         assertEquals(10228230, result)
     }
+
+    @Test
+    fun sumShortestPathsBetweenAncientGalaxiesExample() {
+        val input = """
+            ...#......
+            .......#..
+            #.........
+            ..........
+            ......#...
+            .#........
+            .........#
+            ..........
+            .......#..
+            #...#.....
+        """.trimIndent().split("\n")
+        val result = day11CosmicExpansion.sumShortestPathsBetweenAncientGalaxies(input)
+        assertEquals(82000210, result)
+    }
+
+    @Test
+    fun sumShortestPathsBetweenAncientGalaxies() {
+        val input = readResourceFile()
+        val result = day11CosmicExpansion.sumShortestPathsBetweenAncientGalaxies(input)
+        assertEquals(447073334102, result)
+    }
 }
